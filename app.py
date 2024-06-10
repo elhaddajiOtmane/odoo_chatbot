@@ -11,7 +11,7 @@ password = 'N53C#x?pdm93<'
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
-    
+
 @app.route('/create_lead', methods=['POST'])
 def create_lead():
     data = request.json
@@ -19,6 +19,7 @@ def create_lead():
     contact_name = data.get('contact_name')
     email_from = data.get('email_from')
     phone = data.get('phone')
+    project_requirements = data.get('project_requirements')
 
     # Authenticate
     common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
@@ -30,6 +31,7 @@ def create_lead():
             'contact_name': contact_name,
             'email_from': email_from,
             'phone': phone,
+            'description': project_requirements,  # Store project requirements in the description field
         }])
         return jsonify({'status': 'success', 'lead_id': lead_id})
     else:

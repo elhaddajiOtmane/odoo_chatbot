@@ -14,6 +14,11 @@ def hello_world():
 
 @app.route('/create_lead', methods=['POST'])
 def create_lead():
+    # Check for X-Token header
+    x_token = request.headers.get('X-Token')
+    if x_token != '8lGC0d8AHr98O5dM':
+        return jsonify({'status': 'failed', 'error': 'Invalid token'}), 401
+    
     data = request.json
     name = data.get('name')
     contact_name = data.get('contact_name')

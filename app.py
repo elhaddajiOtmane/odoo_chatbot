@@ -42,5 +42,25 @@ def create_lead():
     else:
         return jsonify({'status': 'failed', 'error': 'Authentication failed'}), 401
 
+@app.route('/get_leads', methods=['GET'])
+def get_leads():
+    # Check for X-Token header
+    x_token = request.headers.get('X-Token')
+    if x_token != '8lGC0d8AHr98O5dM':
+        return jsonify({'status': 'failed', 'error': 'Invalid token'}), 401
+
+    # Authenticate
+    common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
+    uid = common.authenticate(db, username, password, {})
+    if uid:
+        models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
+        leads = models.execute_kw(db, uid, password, 'crm.lead', 'search_read', [
+            [],  # No domain filter for fetching all leads
+            ['name', 'contact_name', 'email_from', 'phone', 'description']  # Fields to fetch
+        ])
+        return jsonify({'status': 'success', 'leads': leads})
+    else:
+        return jsonify({'status': 'failed', 'error': 'Authentication failed'}), 401
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

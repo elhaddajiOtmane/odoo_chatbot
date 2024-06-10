@@ -8,6 +8,10 @@ db = 'webnexa'
 username = 'oelhaddaji@webnexa.net'
 password = 'N53C#x?pdm93<'
 
+@app.route('/')
+def hello_world():
+    return 'Hello, World!'
+    
 @app.route('/create_lead', methods=['POST'])
 def create_lead():
     data = request.json

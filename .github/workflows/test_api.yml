@@ -12,25 +12,34 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      flask:
-        image: flask_app:latest
-        ports:
-          - 5000:5000
-        options: --health-cmd="curl --fail http://localhost:5000 || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
     - name: Build Docker image
       run: docker build -t flask_app .
 
-    - name: Run tests
+    - name: Run Docker container
+      run: docker run -d -p 5000:5000 --name flask_app flask_app
+
+    - name: Wait for Flask to be ready
       run: |
         echo "Waiting for Flask to start..."
         sleep 15
-        curl -H "X-Token: 8lGC0d8AHr98O5dM" http://localhost:5000/get_leads || exit 1
+
+    - name: Test GET request
+      run: |
+        curl -H "X-Token: 8lGC0d8AHr98O5dM" http://localhost:5000/get_leads
+
+    - name: Test POST request
+      run: |
+        curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead
+
+    - name: Verify POST response
+      run: |
         response=$(curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead)
         echo "Response: $response"
-        echo $response | grep '"status": "success"' || exit 1
+        echo $response | grep '"status": "success"'

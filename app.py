@@ -3,10 +3,10 @@ import xmlrpc.client
 
 app = Flask(__name__)
 
-url = 'https://webnexa.odoo.com'
-db = 'webnexa'
-username = 'oelhaddaji@webnexa.net'
-password = 'N53C#x?pdm93<'
+url = 'https://havetdigital1.odoo.com'
+db = 'havetdigital1'
+username = 'necherrate@havetdigital.fr'
+password = 'Nour.2022'
 
 @app.route('/')
 def hello_world():
@@ -24,7 +24,7 @@ def create_lead():
     contact_name = data.get('contact_name')
     email_from = data.get('email_from')
     phone = data.get('phone')
-    project_requirements = data.get('project_requirements')
+    project_requirements = data.get('x_studio_requirements')  # Use the correct field name
 
     # Authenticate
     common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
@@ -36,7 +36,7 @@ def create_lead():
             'contact_name': contact_name,
             'email_from': email_from,
             'phone': phone,
-            'description': project_requirements,  # Store project requirements in the description field
+            'x_studio_requirements': project_requirements,  # Use the correct field name
         }])
         return jsonify({'status': 'success', 'lead_id': lead_id})
     else:
@@ -55,8 +55,8 @@ def get_leads():
     if uid:
         models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
         leads = models.execute_kw(db, uid, password, 'crm.lead', 'search_read', [
-            [],  # No domain filter for fetching all leads
-            ['name', 'contact_name', 'email_from', 'phone', 'description']  
+            [],  
+            ['name', 'contact_name', 'email_from', 'phone', 'x_studio_requirements']  
         ])
         return jsonify({'status': 'success', 'leads': leads})
     else:

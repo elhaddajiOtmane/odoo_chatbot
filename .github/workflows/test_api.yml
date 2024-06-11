@@ -14,7 +14,7 @@ jobs:
 
     services:
       flask:
-        image: python:3.9
+        image: flask_app:latest
         ports:
           - 5000:5000
         options: --health-cmd="curl --fail http://localhost:5000 || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -23,37 +23,14 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
+    - name: Build Docker image
+      run: docker build -t flask_app .
 
-    - name: Install dependencies
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install flask
-
-    - name: Run Flask app
-      run: |
-        source venv/bin/activate
-        nohup flask run --host=0.0.0.0 &
-
-    - name: Wait for Flask to be ready
+    - name: Run tests
       run: |
         echo "Waiting for Flask to start..."
-        sleep 10
-
-    - name: Test GET request
-      run: |
-        curl -H "X-Token: 8lGC0d8AHr98O5dM" http://localhost:5000/get_leads
-
-    - name: Test POST request
-      run: |
-        curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead
-
-    - name: Verify POST response
-      run: |
+        sleep 15
+        curl -H "X-Token: 8lGC0d8AHr98O5dM" http://localhost:5000/get_leads || exit 1
         response=$(curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead)
         echo "Response: $response"
-        echo $response | grep '"status": "success"'
+        echo $response | grep '"status": "success"' || exit 1

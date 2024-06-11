@@ -56,7 +56,7 @@ def get_leads():
         models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
         leads = models.execute_kw(db, uid, password, 'crm.lead', 'search_read', [
             [],  # No domain filter for fetching all leads
-            ['name', 'contact_name', 'email_from', 'phone', 'description']  # Fields to fetch
+            ['name', 'contact_name', 'email_from', 'phone', 'description']  
         ])
         return jsonify({'status': 'success', 'leads': leads})
     else:

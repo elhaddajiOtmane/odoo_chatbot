@@ -1,10 +1,9 @@
 from flask import Flask, request, jsonify
-import xmlrpc.client
-import logging
 
 app = Flask(__name__)
 
 # Configure logging
+import logging
 logging.basicConfig(level=logging.DEBUG)
 
 url = 'https://havetdigital1.odoo.com'
@@ -14,7 +13,31 @@ password = 'Nour.2022'
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return '''
+    <html>
+        <head>
+            <title>Hello, World!</title>
+            <style>
+                body {
+                    background-color: black;
+                    color: green;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                }
+                h1 {
+                    font-size: 3em;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Hello, World!</h1>
+        </body>
+    </html>
+    '''
 
 @app.route('/create_lead', methods=['POST'])
 def create_lead():
@@ -37,6 +60,7 @@ def create_lead():
 
     # Authenticate
     try:
+        import xmlrpc.client
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
         uid = common.authenticate(db, username, password, {})
         if uid:
@@ -69,6 +93,7 @@ def get_leads():
 
     # Authenticate
     try:
+        import xmlrpc.client
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
         uid = common.authenticate(db, username, password, {})
         if uid:

@@ -34,12 +34,13 @@ jobs:
       run: |
         curl -H "X-Token: 8lGC0d8AHr98O5dM" http://localhost:5000/get_leads
 
-    - name: Test POST request
-      run: |
-        curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead
-
-    - name: Verify POST response
+    - name: Test POST request and verify response
       run: |
         response=$(curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead)
         echo "Response: $response"
-        echo $response | grep '"status": "success"'
+        if echo $response | grep '"status": "success"'; then
+          echo "POST request succeeded."
+        else
+          echo "POST request failed."
+          exit 1
+        fi

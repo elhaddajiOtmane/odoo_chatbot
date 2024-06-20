@@ -36,7 +36,7 @@ jobs:
 
     - name: Test POST request and verify response
       run: |
-        response=$(curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"name": "Test Lead", "contact_name": "John Doe", "email_from": "john.doe@example.com", "phone": "1234567890", "x_studio_requirements": "Test requirements"}' http://localhost:5000/create_lead)
+        response=$(curl -X POST -H "Content-Type: application/json" -H "X-Token: 8lGC0d8AHr98O5dM" -d '{"partner_name": "Random Partner", "name": "Random Lead", "phone": "123-456-7890", "email_from": "random@example.com", "x_studio_offre": "Random Offer"}' http://localhost:5000/create_lead)
         echo "Response: $response"
         if [[ $response == *'"status":"success"'* ]]; then
           echo "POST request succeeded."

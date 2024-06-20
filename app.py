@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
+import xmlrpc.client
+import logging
 
 app = Flask(__name__)
 
 # Configure logging
-import logging
 logging.basicConfig(level=logging.DEBUG)
 
 url = 'https://havetdigital1.odoo.com'
@@ -52,25 +53,24 @@ def create_lead():
     data = request.json
     logging.debug(f'Request data: {data}')
     
+    partner_name = data.get('partner_name')
     name = data.get('name')
-    contact_name = data.get('contact_name')
-    email_from = data.get('email_from')
     phone = data.get('phone')
-    project_requirements = data.get('x_studio_requirements')
+    email_from = data.get('email_from')
+    offre = data.get('x_studio_offre')
 
     # Authenticate
     try:
-        import xmlrpc.client
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
         uid = common.authenticate(db, username, password, {})
         if uid:
             models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
             lead_id = models.execute_kw(db, uid, password, 'crm.lead', 'create', [{
+                'partner_name': partner_name,
                 'name': name,
-                'contact_name': contact_name,
-                'email_from': email_from,
                 'phone': phone,
-                'x_studio_requirements': project_requirements,
+                'email_from': email_from,
+                'x_studio_offre': offre,
             }])
             logging.info(f'Lead created with id: {lead_id}')
             return jsonify({'status': 'success', 'lead_id': lead_id})
@@ -93,14 +93,13 @@ def get_leads():
 
     # Authenticate
     try:
-        import xmlrpc.client
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
         uid = common.authenticate(db, username, password, {})
         if uid:
             models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
             leads = models.execute_kw(db, uid, password, 'crm.lead', 'search_read', [
                 [],  
-                ['name', 'contact_name', 'email_from', 'phone', 'x_studio_requirements']
+                ['partner_name', 'name', 'phone', 'email_from', 'x_studio_offre']
             ])
             logging.info(f'Leads retrieved: {leads}')
             return jsonify({'status': 'success', 'leads': leads})

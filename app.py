@@ -7,10 +7,10 @@ app = Flask(__name__)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-url = 'https://havetdigital1.odoo.com'
-db = 'havetdigital1'
-username = 'necherrate@havetdigital.fr'
-password = 'Nour.2022'
+url = 'https://havet-digital.odoo.com'
+db = 'havet-digital'
+username = 'contact@onlysim.fr'
+password = 'WT9JdYij436gt2'
 
 @app.route('/')
 def hello_world():

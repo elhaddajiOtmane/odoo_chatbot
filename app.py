@@ -2,6 +2,16 @@ from flask import Flask, request, jsonify
 import xmlrpc.client
 import logging
 import quickemailverification
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+# Initialize Sentry SDK
+sentry_sdk.init(
+    dsn="https://93b091c96bad1b42e8bd001e6cf037bf@o4506230651158528.ingest.us.sentry.io/4507504834969600",
+    traces_sample_rate=1.0,  # Set to 1.0 to capture 100% of transactions
+    profiles_sample_rate=1.0,  # Set to 1.0 to profile 100% of sampled transactions
+    integrations=[FlaskIntegration()]
+)
 
 app = Flask(__name__)
 
@@ -28,6 +38,7 @@ def verify_email(email):
 
 @app.route('/')
 def hello_world():
+    1/0
     return '''
     <html>
         <head>
@@ -96,7 +107,8 @@ def create_lead():
             return jsonify({'status': 'failed', 'error': 'Authentication failed'}), 401
     except Exception as e:
         logging.error(f'Error during lead creation: {e}')
-        return jsonify({'status': 'failed', 'error': str(e)}), 500
+        # Sentry will capture this exception
+        raise e
 
 @app.route('/get_leads', methods=['GET'])
 def get_leads():
@@ -123,7 +135,8 @@ def get_leads():
             return jsonify({'status': 'failed', 'error': 'Authentication failed'}), 401
     except Exception as e:
         logging.error(f'Error during lead retrieval: {e}')
-        return jsonify({'status': 'failed', 'error': str(e)}), 500
+        # Sentry will capture this exception
+        raise e
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

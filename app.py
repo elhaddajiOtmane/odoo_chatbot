@@ -13,7 +13,7 @@ db = 'havet-digital'
 username = 'contact@onlysim.fr'
 password = 'WT9JdYij436gt2'
 
-client = quickemailverification.Client('YOUR_API_KEY')  # Replace 'YOUR_API_KEY' with your actual API key
+client = quickemailverification.Client('7b4e0cb15952da9023b34e7466d85baab9f1e376b2b02d1df057dbbdd2bc')  # Replace 'YOUR_API_KEY' with your actual API key
 quickemailverification = client.quickemailverification()
 
 def verify_email(email):

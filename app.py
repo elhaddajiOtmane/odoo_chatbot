@@ -138,5 +138,9 @@ def get_leads():
         # Sentry will capture this exception
         raise e
 
+@app.route('/trigger_error')
+def trigger_error():
+    1 / 0  # This will raise a ZeroDivisionError
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

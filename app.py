@@ -149,7 +149,7 @@ def get_leads():
     logging.debug('Received request for /get_leads')
 
     x_token = request.headers.get('X-Token')
-    if x_token != '8lGC0d8AHr98O5dM':
+    if x_token != '76cb52e83775a6364b21807ef89ac26f4d690eb6':
         logging.warning('Invalid token')
         return jsonify({'status': 'failed', 'error': 'Invalid token'}), 401
 

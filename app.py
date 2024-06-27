@@ -38,7 +38,6 @@ def verify_email(email):
 
 @app.route('/')
 def hello_world():
-    1/0
     return '''
     <html>
         <head>

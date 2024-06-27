@@ -120,7 +120,7 @@ def create_lead():
 
     # Email verification
     email_valid, email_message = verify_email(email_from)
-    email_validation_status = "oui" if email_valid else "no"
+    email_validation_status = "valide" if email_valid else "invalide"
     
     try:
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))

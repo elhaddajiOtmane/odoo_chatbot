@@ -1,10 +1,7 @@
 from flask import Flask, request, jsonify
 import xmlrpc.client
 import logging
-import socket
-import smtplib
-import dns.resolver
-import idna
+import quickemailverification
 
 app = Flask(__name__)
 
@@ -16,61 +13,18 @@ db = 'havet-digital'
 username = 'contact@onlysim.fr'
 password = 'WT9JdYij436gt2'
 
+client = quickemailverification.Client('7b4e0cb15952da9023b34e7466d85baab9f1e376b2b02d1df057dbbdd2bc') 
+quickemailverification = client.quickemailverification()
+
 def verify_email(email):
     print(f"Verifying email: {email}")
-    
-    try:
-        local_part, domain = email.split('@')
-        print(f"Local part: {local_part}")
-        print(f"Domain: {domain}")
-    except ValueError:
-        return False, "Invalid email format"
+    response = quickemailverification.verify(email)
+    print(response.body)
 
-    if not domain or len(domain) > 255:
-        return False, "Invalid domain: empty or too long"
-
-    try:
-        encoded_domain = idna.encode(domain).decode('ascii')
-        print(f"Encoded domain: {encoded_domain}")
-    except idna.IDNAError as e:
-        return False, f"Invalid domain: {str(e)}"
-
-    try:
-        mx_records = dns.resolver.resolve(encoded_domain, 'MX')
-        print(f"MX records: {mx_records}")
-    except dns.resolver.NXDOMAIN:
-        return False, "Domain does not exist"
-    except dns.resolver.NoAnswer:
-        return False, "No MX records found for domain"
-    except dns.exception.DNSException as e:
-        return False, f"DNS error: {str(e)}"
-
-    mx_servers = sorted(mx_records, key=lambda x: x.preference)
-    for mx in mx_servers:
-        mx_server = str(mx.exchange)
-        print(f"Trying MX server: {mx_server}")
-        
-        if mx_server == '.':
-            print("Invalid MX server, skipping")
-            continue
-
-        try:
-            smtp = smtplib.SMTP(timeout=10)
-            smtp.connect(mx_server)
-            smtp.helo(smtp.local_hostname)
-            smtp.mail('')
-            code, message = smtp.rcpt(str(email))
-            smtp.quit()
-
-            if code == 250:
-                return True, "Email address exists"
-            else:
-                return False, f"Email address does not exist (SMTP code: {code})"
-        except (socket.gaierror, socket.error, smtplib.SMTPException, UnicodeError) as e:
-            print(f"Error with MX server {mx_server}: {str(e)}")
-            continue
-
-    return False, "Unable to verify email with any MX server"
+    if response.body['result'] == 'valid':
+        return True, "Email address exists"
+    else:
+        return False, "Email address does not exist"
 
 @app.route('/')
 def hello_world():

@@ -4,6 +4,7 @@ import logging
 import quickemailverification
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+import json
 
 # Initialize Sentry SDK
 sentry_sdk.init(
@@ -35,6 +36,14 @@ def verify_email(email):
         return True, "Email address exists"
     else:
         return False, response.body['message'] or "Email address does not exist"
+
+def parse_offre(offre):
+    try:
+        # Try to parse as JSON
+        return json.loads(offre)
+    except (ValueError, TypeError):
+        # If not JSON, return the original value
+        return offre
 
 @app.route('/')
 def hello_world():
@@ -81,6 +90,7 @@ def create_lead():
     phone = data.get('phone')
     email_from = data.get('email_from')
     offre = data.get('x_studio_offre')
+    parsed_offre = parse_offre(offre)
 
     # Email verification
     email_valid, email_message = verify_email(email_from)
@@ -96,7 +106,7 @@ def create_lead():
                 'name': name,
                 'phone': phone,
                 'email_from': email_from,
-                'x_studio_offre': offre,
+                'x_studio_offre': parsed_offre,
                 'x_studio_valide': email_validation_status,
             }])
             logging.info(f'Lead created with id: {lead_id}')

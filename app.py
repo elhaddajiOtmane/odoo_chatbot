@@ -9,10 +9,11 @@ import json
 # Initialize Sentry SDK
 sentry_sdk.init(
     dsn="https://93b091c96bad1b42e8bd001e6cf037bf@o4506230651158528.ingest.us.sentry.io/4507504834969600",
-    traces_sample_rate=1.0,  # Set to 1.0 to capture 100% of transactions
-    profiles_sample_rate=1.0,  # Set to 1.0 to profile 100% of sampled transactions
+    traces_sample_rate=1.0,  
+    profiles_sample_rate=1.0,  
     integrations=[FlaskIntegration()]
 )
+
 
 app = Flask(__name__)
 

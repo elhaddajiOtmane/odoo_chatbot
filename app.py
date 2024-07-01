@@ -4,16 +4,14 @@ import logging
 import quickemailverification
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-import json
 
 # Initialize Sentry SDK
 sentry_sdk.init(
     dsn="https://93b091c96bad1b42e8bd001e6cf037bf@o4506230651158528.ingest.us.sentry.io/4507504834969600",
-    traces_sample_rate=1.0,  
-    profiles_sample_rate=1.0,  
+    traces_sample_rate=1.0,  # Set to 1.0 to capture 100% of transactions
+    profiles_sample_rate=1.0,  # Set to 1.0 to profile 100% of sampled transactions
     integrations=[FlaskIntegration()]
 )
-
 
 app = Flask(__name__)
 
@@ -37,17 +35,6 @@ def verify_email(email):
         return True, "Email address exists"
     else:
         return False, response.body['message'] or "Email address does not exist"
-
-def parse_offre(offre):
-    try:
-        # Try to parse as JSON
-        parsed = json.loads(offre)
-        if isinstance(parsed, list) and all(isinstance(item, str) for item in parsed):
-            return parsed
-        else:
-            raise ValueError("Offre should be a list of strings")
-    except (ValueError, TypeError) as e:
-        raise ValueError("Invalid format for offre. It should be a JSON array of strings") from e
 
 @app.route('/')
 def hello_world():
@@ -95,11 +82,6 @@ def create_lead():
     email_from = data.get('email_from')
     offre = data.get('x_studio_offre')
 
-    try:
-        parsed_offre = parse_offre(offre)
-    except ValueError as e:
-        return jsonify({'status': 'failed', 'error': str(e)}), 400
-
     # Email verification
     email_valid, email_message = verify_email(email_from)
     email_validation_status = "valide" if email_valid else "invalide"
@@ -114,7 +96,7 @@ def create_lead():
                 'name': name,
                 'phone': phone,
                 'email_from': email_from,
-                'x_studio_offre': parsed_offre,
+                'x_studio_offre': offre,  # Store raw data
                 'x_studio_valide': email_validation_status,
             }])
             logging.info(f'Lead created with id: {lead_id}')

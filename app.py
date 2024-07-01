@@ -37,19 +37,15 @@ def verify_email(email):
     else:
         return False, response.body['message'] or "Email address does not exist"
 
-def sanitize_offre(offre):
-    if isinstance(offre, str):
-        try:
-            # Remove leading and trailing double quotes
-            if offre.startswith('"') and offre.endswith('"'):
-                offre = offre[1:-1]
-            # Try to parse as JSON if it is a valid JSON string
+def parse_offre(offre):
+    try:
+        # Try to parse as JSON if it's a string that looks like JSON
+        if isinstance(offre, str) and (offre.startswith('[') or offre.startswith('{')):
             parsed = json.loads(offre)
             return parsed
-        except (json.JSONDecodeError, TypeError):
-            # If not JSON, return the original string
-            return offre
-    return offre
+    except (ValueError, TypeError):
+        pass
+    return offre  # Return as is if not a JSON string
 
 @app.route('/')
 def hello_world():
@@ -97,8 +93,10 @@ def create_lead():
     email_from = data.get('email_from')
     offre = data.get('x_studio_offre')
 
-    # Sanitize the offre
-    sanitized_offre = sanitize_offre(offre)
+    try:
+        parsed_offre = parse_offre(offre)
+    except ValueError as e:
+        return jsonify({'status': 'failed', 'error': str(e)}), 400
 
     # Email verification
     email_valid, email_message = verify_email(email_from)
@@ -114,7 +112,7 @@ def create_lead():
                 'name': name,
                 'phone': phone,
                 'email_from': email_from,
-                'x_studio_offre': sanitized_offre,
+                'x_studio_offre': parsed_offre,  # Store parsed data
                 'x_studio_valide': email_validation_status,
             }])
             logging.info(f'Lead created with id: {lead_id}')

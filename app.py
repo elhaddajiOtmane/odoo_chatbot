@@ -40,10 +40,13 @@ def verify_email(email):
 def parse_offre(offre):
     try:
         # Try to parse as JSON
-        return json.loads(offre)
-    except (ValueError, TypeError):
-        # If not JSON, return the original value
-        return offre
+        parsed = json.loads(offre)
+        if isinstance(parsed, list) and all(isinstance(item, str) for item in parsed):
+            return parsed
+        else:
+            raise ValueError("Offre should be a list of strings")
+    except (ValueError, TypeError) as e:
+        raise ValueError("Invalid format for offre. It should be a JSON array of strings") from e
 
 @app.route('/')
 def hello_world():
@@ -90,7 +93,11 @@ def create_lead():
     phone = data.get('phone')
     email_from = data.get('email_from')
     offre = data.get('x_studio_offre')
-    parsed_offre = parse_offre(offre)
+
+    try:
+        parsed_offre = parse_offre(offre)
+    except ValueError as e:
+        return jsonify({'status': 'failed', 'error': str(e)}), 400
 
     # Email verification
     email_valid, email_message = verify_email(email_from)
